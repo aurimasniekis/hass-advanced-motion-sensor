@@ -34,6 +34,7 @@ class AdvanceMotionSensorTimeout(RestoreNumber, AMSEntity):
     _attr_native_max_value = 86400
     _attr_mode = NumberMode.BOX
     _attr_entity_category = EntityCategory.CONFIG
+    _attr_should_poll = False
 
     def __init__(self, hass: HomeAssistant, ams_entry: AdvancedMotionSensorEntry):
         super().__init__(ams_entry)
@@ -55,5 +56,6 @@ class AdvanceMotionSensorTimeout(RestoreNumber, AMSEntity):
     def device_info(self) -> DeviceInfo | None:
         return {"identifiers": {(DOMAIN, self._entry_id)}}
 
-    def set_native_value(self, value: float) -> None:
+    async def async_set_native_value(self, value: float) -> None:
         self._attr_native_value = value
+        self.async_write_ha_state()

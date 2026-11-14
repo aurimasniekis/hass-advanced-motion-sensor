@@ -2,9 +2,8 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import callback, HomeAssistant, ServiceCall, SupportsResponse, ServiceResponse
-from . import SERVICE_STOP_TIMER
 from .config_flow import STEP_USER_DATA_SCHEMA
-from .const import _LOGGER, DOMAIN, SERVICE_MULTI_REGISTER
+from .const import DOMAIN, SERVICE_MULTI_REGISTER
 
 
 @callback
@@ -51,18 +50,3 @@ def async_setup_services(hass: HomeAssistant) -> None:
         }),
     )
 
-
-@callback
-def async_unload_services(hass: HomeAssistant) -> None:
-    if hass.data[DOMAIN]:
-        # There is still another config entry for this domain, don't remove services.
-        return
-
-    existing_services = hass.services.async_services().get(DOMAIN)
-    if not existing_services or SERVICE_STOP_TIMER not in existing_services:
-        return
-
-    _LOGGER.info("Unloading Advanced Motion Sensor Services")
-
-    hass.services.async_remove(domain=DOMAIN, service=SERVICE_STOP_TIMER)
-    hass.services.async_remove(domain=DOMAIN, service=SERVICE_MULTI_REGISTER)

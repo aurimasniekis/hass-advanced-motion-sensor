@@ -1,41 +1,39 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "Device is already configured"
-        },
-        "error": {
-            "cannot_connect": "Failed to connect",
-            "invalid_auth": "Invalid authentication",
-            "unknown": "Unexpected error"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "name": "Name",
-                    "timeout": "Timer Duration",
-                    "sources": "Motion Sources"
-                }
-            }
-        }
+  "config": {
+    "error": {
+      "invalid_input": "One or more of the selected motion sources does not exist.",
+      "unknown": "Unexpected error"
     },
-    "entity": {
-        "sensor": {
-            "advance_motion_sensor_state": {
-                "state": {
-                    "clear": "Clear",
-                    "detected": "Detected",
-                    "timer": "Timer"
-                }
-            }
+    "step": {
+      "user": {
+        "data": {
+          "name": "Name",
+          "timeout": "Timer Duration",
+          "sources": "Motion Sources"
         },
-        "select": {
-            "advance_motion_sensor_mode": {
-                "state": {
-                    "auto": "AUTO",
-                    "clear": "Clear",
-                    "detected": "Detected"
-                }
-            }
-        }
+        "title": "Advanced Motion Sensor",
+        "description": "Combine one or more motion sensors into a single presence sensor with an off-delay timer."
+      }
     }
+  },
+  "entity": {
+    "sensor": {
+      "advance_motion_sensor_state": {
+        "state": {
+          "clear": "Clear",
+          "detected": "Detected",
+          "timer": "Timer"
+        }
+      }
+    },
+    "select": {
+      "advance_motion_sensor_mode": {
+        "state": {
+          "auto": "Auto",
+          "clear": "Clear",
+          "detected": "Detected"
+        }
+      }
+    }
+  }
 }

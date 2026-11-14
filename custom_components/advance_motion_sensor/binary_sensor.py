@@ -11,6 +11,7 @@ from .const import DOMAIN, EntryType, _LOGGER
 from .entity import AMSEntity
 from homeassistant.components.binary_sensor import BinarySensorEntity, BinarySensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant, callback, State, Event
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
@@ -53,13 +54,11 @@ class AdvanceMotionSensorPresence(BinarySensorEntity, AMSEntity):
     async def async_initialized(self) -> None:
         self.async_on_remove(start.async_at_started(self._hass, self._async_start))
 
-    @callback
     async def _async_start(self, _: HomeAssistant | None = None) -> None:
 
         @callback
-        def async_mode_changed_listener(event: Event) -> None:
-            new_state: State | None = event.data.get("new_state")
-            if new_state is None:
+        def _apply(new_state: State | None) -> None:
+            if new_state is None or new_state.state in (STATE_UNAVAILABLE, STATE_UNKNOWN):
                 return
 
             if new_state.state == "clear":
@@ -70,6 +69,12 @@ class AdvanceMotionSensorPresence(BinarySensorEntity, AMSEntity):
                 _LOGGER.error("Unknown value received from mode state: %s", new_state.state)
 
             self.async_schedule_update_ha_state()
+
+        @callback
+        def async_mode_changed_listener(event: Event) -> None:
+            _apply(event.data.get("new_state"))
+
+        _apply(self._hass.states.get(self._ams_entry.state_sensor.entity_id))
 
         self.async_on_remove(
             async_track_state_change_event(self._hass, self._ams_entry.state_sensor.entity_id, async_mode_changed_listener)

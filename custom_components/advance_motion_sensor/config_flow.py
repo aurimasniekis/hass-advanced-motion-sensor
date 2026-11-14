@@ -13,7 +13,6 @@ from .const import DOMAIN, _LOGGER
 from homeassistant.helpers import selector
 from homeassistant.helpers.selector import NumberSelectorMode
 
-# TODO adjust the data schema to the data that you need
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required("name"): selector.TextSelector(),
@@ -54,7 +53,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except vol.Invalid as err:
                 _LOGGER.error(err)
                 errors["base"] = "invalid_input"
-                errors["message"] = str(err)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"

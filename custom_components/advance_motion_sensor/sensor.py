@@ -132,7 +132,6 @@ class AdvanceMotionSensorState(SensorEntity, AMSEntity):
     def async_stop_timer(self):
         self._async_timer_cancel()
 
-    @callback
     async def _async_start(self, _: HomeAssistant | None = None) -> None:
         self._entity_registry = er.async_get(self._hass)
         self._async_start_sources_listener()
@@ -140,8 +139,8 @@ class AdvanceMotionSensorState(SensorEntity, AMSEntity):
         self._async_start_timeout_listener()
 
     def _async_start_mode_listener(self, _=None) -> None:
-        if self._ams_entry.mode_select.state:
-            self._mode_changed_listener(SensorModeOption(self._ams_entry.mode_select.state))
+        if mode := SensorModeOption.parse(self._ams_entry.mode_select.state or ""):
+            self._mode_changed_listener(mode)
             self.async_schedule_update_ha_state()
 
         self.async_on_remove(
@@ -168,11 +167,21 @@ class AdvanceMotionSensorState(SensorEntity, AMSEntity):
         if not new_state:
             return
 
-        self._attr_duration = timedelta(seconds=int(float(new_state.state)))
+        try:
+            self._attr_duration = timedelta(seconds=int(float(new_state.state)))
+        except ValueError:
+            # unavailable / unknown: keep the current duration
+            return
 
         self.async_schedule_update_ha_state()
 
     def _async_start_sources_listener(self):
+        # Seed with the current source states so a source that is already "on"
+        # at startup is seen without waiting for it to change.
+        for entity_id in self._ams_entry.sources:
+            if (state := self._hass.states.get(entity_id)) is not None:
+                self._source_states[entity_id] = state.state
+
         self.async_on_remove(
             async_track_state_change_event(self._hass, self._ams_entry.sources, self._async_source_changed_listener)
         )
@@ -194,7 +203,8 @@ class AdvanceMotionSensorState(SensorEntity, AMSEntity):
         if not new_state:
             return
 
-        self._mode_changed_listener(SensorModeOption(new_state.state))
+        if mode := SensorModeOption.parse(new_state.state):
+            self._mode_changed_listener(mode)
 
     def _mode_changed_listener(self, new_state: SensorModeOption) -> None:
         if new_state == SensorModeOption.AUTO:

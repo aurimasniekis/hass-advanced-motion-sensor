@@ -1,19 +1,25 @@
 stop_timer:
-  description: Stop Advanced Motion Sensor Timer
-  fields:
-    entity_id:
-      description: The entity to call the service on.
-      example: "sensor.my_entity"
+  name: Stop timer
+  description: Stop the off-delay timer of an Advanced Motion Sensor state sensor.
+  target:
+    entity:
+      domain: sensor
+      integration: advance_motion_sensor
 
 register_multiple:
-  description: Register multiple instances of the Advanced Motion Sensor
+  name: Register multiple
+  description: Create several Advanced Motion Sensor entries at once. Returns the result for each entry.
   fields:
     entries:
-      description: List of entries
+      name: Entries
+      description: List of entries, each with a name, timeout (seconds) and list of binary_sensor sources.
+      required: true
       example:
-        - name: "Example Name 1"
-          timeout: 10
-          sources: [ "binary_sensor.foo", "binary_sensor.bar" ]
-        - name: "Example Name 2"
-          timeout: 5
-          sources: [ "binary_sensor.foobar" ]
+        - name: "Hallway"
+          timeout: 120
+          sources: ["binary_sensor.hallway_motion_1", "binary_sensor.hallway_motion_2"]
+        - name: "Kitchen"
+          timeout: 60
+          sources: ["binary_sensor.kitchen_motion"]
+      selector:
+        object:

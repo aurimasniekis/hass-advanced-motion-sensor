@@ -46,6 +46,7 @@ class AdvanceMotionSensorMode(SelectEntity, RestoreEntity, AMSEntity):
     _attr_icon = "mdi:arrow-decision-auto"
     _attr_options: list[SensorModeOption] = list(SensorModeOption)
     _attr_translation_key = "advance_motion_sensor_mode"
+    _attr_should_poll = False
 
     def __init__(self, hass: HomeAssistant, ams_entry: AdvancedMotionSensorEntry):
         super().__init__(ams_entry)
@@ -59,7 +60,7 @@ class AdvanceMotionSensorMode(SelectEntity, RestoreEntity, AMSEntity):
 
     async def async_added_to_hass(self) -> None:
         if last_data := await self.async_get_last_state():
-            self._attr_current_option = SensorModeOption.parse(last_data.state)
+            self._attr_current_option = SensorModeOption.parse(last_data.state) or SensorModeOption.AUTO
 
         await self._ams_entry.async_added_to_hass(EntryType.MODE)
 
@@ -67,7 +68,7 @@ class AdvanceMotionSensorMode(SelectEntity, RestoreEntity, AMSEntity):
     def device_info(self) -> DeviceInfo | None:
         return {"identifiers": {(DOMAIN, self._entry_id)}}
 
-    def select_option(self, option: str) -> None:
+    async def async_select_option(self, option: str) -> None:
         value = SensorModeOption.parse(option)
 
         if value is None:
@@ -75,3 +76,4 @@ class AdvanceMotionSensorMode(SelectEntity, RestoreEntity, AMSEntity):
             return
 
         self._attr_current_option = value
+        self.async_write_ha_state()
